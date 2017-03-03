@@ -37,7 +37,14 @@ namespace Assets.Scripts
         {
             foreach (var pill in Pills)
             {
-                pill.Needs = DefaultNeedVaules;
+                if (pill.Needs == null)
+                {
+                    pill.Needs = new Dictionary<NeedType, double>();
+                }
+                foreach (var key in DefaultNeedVaules.Keys)
+                {
+                    pill.Needs.Add(key, DefaultNeedVaules[key]);
+                }
             }
         }
     }

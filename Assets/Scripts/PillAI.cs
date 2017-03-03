@@ -19,6 +19,8 @@ namespace Assets.Scripts
         {
             NavAgent = GetComponent<NavMeshAgent>();
             InvokeRepeating("UpdateNeeds", UpdateTimeoutValue, UpdateTimeoutValue);
+            KnownNeedFullFillers = GameObject.FindObjectsOfType<NeedFullFiller>()
+                .ToList();
         }
 	
 	
@@ -28,12 +30,33 @@ namespace Assets.Scripts
 
         private void UpdateNeeds()
         {
-            List<NeedType> types = Needs.Keys.ToList();
+            Debug.Log("Updating needs");
+            var types = Needs.Keys.ToList();
             foreach (var needsKey in types)
             {
                 Needs[needsKey] -= UpdateNeedValue;
-                Debug.Log(Needs[needsKey]);
+                if (Needs[needsKey] < RefillTriggerValue)
+                {
+                    GoAndRefill(needsKey);
+                }
+
             }
+        }
+
+        private void GoAndRefill(NeedType need)
+        {
+            foreach (var fullfiller in KnownNeedFullFillers)
+            {
+                if (fullfiller.NeedFullFilled.Equals(need))
+                {
+                    GoToPoint(fullfiller.transform.position);
+                }
+            }
+        }
+
+        private void GoToPoint(Vector3 transformPosition)
+        {
+            NavAgent.destination = transformPosition;
         }
     }
 }
