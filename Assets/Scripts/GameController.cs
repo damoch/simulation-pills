@@ -10,11 +10,12 @@ namespace Assets.Scripts
         public double DefaultFoodValue;
         public double DefaultWaterValue;
         public Dictionary<NeedType, double> DefaultNeedVaules { get; set; }
-        private List<PillAI> Pills { get; set; }
+        private List<PillAi> Pills { get; set; }
+
 
         private void Start()
         {
-            Pills = FindObjectsOfType<PillAI>().ToList();
+            Pills = FindObjectsOfType<PillAi>().ToList();
             DefaultNeedVaules = SetDefaultNeedValues();
             InitializeNeeds();
         }
