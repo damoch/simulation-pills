@@ -15,9 +15,9 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            Pills = FindObjectsOfType<PillAi>().ToList();
             DefaultNeedVaules = SetDefaultNeedValues();
-            InitializeNeeds();
+            Pills = FindObjectsOfType<PillAi>().ToList();
+            //InitializeNeeds();
         }
 
         private Dictionary<NeedType, double> SetDefaultNeedValues()
@@ -38,13 +38,13 @@ namespace Assets.Scripts
         {
             foreach (var pill in Pills)
             {
-                if (pill.Needs == null)
+                if (pill.GetNeedsDictionary() == null)
                 {
-                    pill.Needs = new Dictionary<NeedType, double>();
+                    pill.SetNeedsDictionary(new Dictionary<NeedType, double>());
                 }
                 foreach (var key in DefaultNeedVaules.Keys)
                 {
-                    pill.Needs.Add(key, DefaultNeedVaules[key]);
+                    pill.AppendNewNeed(new KeyValuePair<NeedType, double>(key, DefaultNeedVaules[key]));
                 }
             }
         }

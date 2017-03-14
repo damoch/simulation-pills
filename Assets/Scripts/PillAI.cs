@@ -7,10 +7,10 @@ namespace Assets.Scripts
 {
     public class PillAi : MonoBehaviour
     {
-        private List<PillAi> _friends;
+        
+        private Pill _pill;
+        
         public NavMeshAgent NavAgent { get; set; }
-        public List<NeedFullFiller> KnownNeedFullFillers { get; set; }
-        public Dictionary<NeedType, double> Needs { get; set; }
         public float UpdateTimeoutValue;
         public double UpdateNeedValue;
 
@@ -18,8 +18,13 @@ namespace Assets.Scripts
 
         private void Start ()
         {
-            KnownNeedFullFillers = new List<NeedFullFiller>();
-            _friends = new List<PillAi>();
+            _pill = new Pill
+            {
+                KnownNeedFullFillers = new List<NeedFullFiller>(),
+                Friends = new List<PillAi>(),
+                Needs = new Dictionary<NeedType, double>()
+            };
+            NeedUtils.InitializeNeeds(this);
             NavAgent = GetComponent<NavMeshAgent>();
             InvokeRepeating("UpdateNeeds", UpdateTimeoutValue, UpdateTimeoutValue);
         }
@@ -29,14 +34,29 @@ namespace Assets.Scripts
 		
         }
 
+        public Dictionary<NeedType, double> GetNeedsDictionary()
+        {
+            return _pill.Needs;
+        }
+
+        public void SetNeedsDictionary(Dictionary<NeedType, double> needs)
+        {
+            _pill.Needs = needs;
+        }
+
+        public void AppendNewNeed(KeyValuePair<NeedType, double> item)
+        {
+            _pill.Needs.Add(item.Key,item.Value);
+        }
+
         private void UpdateNeeds()
         {
             Debug.Log("Updating needs");
-            var types = Needs.Keys.ToList();
+            var types = _pill.Needs.Keys.ToList();
             foreach (var needsKey in types)
             {
-                Needs[needsKey] -= UpdateNeedValue;
-                if (Needs[needsKey] < RefillTriggerValue)
+                _pill.Needs[needsKey] -= UpdateNeedValue;
+                if (_pill.Needs[needsKey] < RefillTriggerValue)
                 {
                     GoAndRefill(needsKey);
                 }
@@ -45,7 +65,7 @@ namespace Assets.Scripts
 
         private void GoAndRefill(NeedType need)
         {
-            foreach (var fullfiller in KnownNeedFullFillers)
+            foreach (var fullfiller in _pill.KnownNeedFullFillers)
             {
                 if (fullfiller.NeedFullFilled.Equals(need))
                 {
@@ -61,12 +81,12 @@ namespace Assets.Scripts
 
         public void AddNewFriend(PillAi friend)
         {
-            if (!_friends.Contains(friend))
+            if (!_pill.Friends.Contains(friend))
             {
-                _friends.Add(friend);
-                if (!friend._friends.Contains(this))
+                _pill.Friends.Add(friend);
+                if (!friend._pill.Friends.Contains(this))
                 {
-                    friend._friends.Add(this);
+                    friend._pill.Friends.Add(this);
                 }
                 friend.Call("Im here!",transform.position);
                 ShareKnowledge(friend);
@@ -75,12 +95,12 @@ namespace Assets.Scripts
 
         private void ShareKnowledge(PillAi friend)
         {
-            foreach (var knownNeedFullFiller in KnownNeedFullFillers)
+            foreach (var knownNeedFullFiller in _pill.KnownNeedFullFillers)
             {
                 friend.UpdateNeedFillers(knownNeedFullFiller);
             }
 
-            foreach (var friendKnownNeedFullFiller in friend.KnownNeedFullFillers)
+            foreach (var friendKnownNeedFullFiller in friend._pill.KnownNeedFullFillers)
             {
                 UpdateNeedFillers(friendKnownNeedFullFiller);
             }
@@ -94,11 +114,11 @@ namespace Assets.Scripts
 
         public void UpdateNeedFillers(NeedFullFiller needFullFiller)
         {
-            if (!KnownNeedFullFillers.Contains(needFullFiller))
+            if (!_pill.KnownNeedFullFillers.Contains(needFullFiller))
             {
                 Debug.Log("Adding " + needFullFiller);
-                KnownNeedFullFillers.Add(needFullFiller);
-                foreach (var friend in _friends)
+                _pill.KnownNeedFullFillers.Add(needFullFiller);
+                foreach (var friend in _pill.Friends)
                 {
                     friend.UpdateNeedFillers(needFullFiller);
                 }
