@@ -1,20 +1,39 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using Assets.Scripts;
+using System.Xml;
+using System.Xml.Serialization;
 using UnityEngine;
 
-public class NeedUtils : MonoBehaviour {
-
-    public static void InitializeNeeds(PillAi pill)
+namespace Assets.Scripts
+{
+    public class NeedUtils : MonoBehaviour
     {
-        var gc = GameObject.FindObjectOfType<GameController>();
-        if (pill.GetNeedsDictionary() == null)
+        public static void InitializeNeeds(PillAi pillAI)
         {
-            pill.SetNeedsDictionary(new Dictionary<NeedType, double>());
+            var path = "Assets\\Resources\\Needs.xml";
+            var reader = new XmlTextReader(path);
+            var serializer = new XmlSerializer(typeof(Needs));
+            var defaults = (Needs)serializer.Deserialize(reader);
+            foreach (var need in defaults.Need)
+            {
+                pillAI.Pill.Needs[need.NeedType] = need.Value;
+            }
         }
-        foreach (var key in gc.DefaultNeedVaules.Keys)
-        {
-            pill.AppendNewNeed(new KeyValuePair<NeedType, double>(key, gc.DefaultNeedVaules[key]));
-        }
+    }
+    [XmlRoot(ElementName = "need")]
+    public class Need
+    {
+        [XmlElement(ElementName = "need_type")]
+        public NeedType NeedType { get; set; }
+        [XmlElement(ElementName = "value")]
+        public double Value { get; set; }
+    }
+
+    [XmlRoot(ElementName = "needs")]
+    public class Needs
+    {
+        [XmlElement(ElementName = "need")]
+        public List<Need> Need { get; set; }
     }
 }

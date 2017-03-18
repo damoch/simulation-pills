@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<needs>
+  <need>
+    <need_type>Food</need_type>
+    <value>50</value>
+  </need>
+  <need>
+    <need_type>Water</need_type>
+    <value>50</value>
+  </need>
+</needs>

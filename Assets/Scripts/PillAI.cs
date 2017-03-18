@@ -7,9 +7,9 @@ namespace Assets.Scripts
 {
     public class PillAi : MonoBehaviour
     {
-        
-        private Pill _pill;
-        
+
+        public Pill Pill { get; set; }
+
         public NavMeshAgent NavAgent { get; set; }
         public float UpdateTimeoutValue;
         public double UpdateNeedValue;
@@ -18,7 +18,7 @@ namespace Assets.Scripts
 
         private void Start ()
         {
-            _pill = new Pill
+            Pill = new Pill
             {
                 KnownNeedFullFillers = new List<NeedFullFiller>(),
                 Friends = new List<PillAi>(),
@@ -34,29 +34,15 @@ namespace Assets.Scripts
 		
         }
 
-        public Dictionary<NeedType, double> GetNeedsDictionary()
-        {
-            return _pill.Needs;
-        }
-
-        public void SetNeedsDictionary(Dictionary<NeedType, double> needs)
-        {
-            _pill.Needs = needs;
-        }
-
-        public void AppendNewNeed(KeyValuePair<NeedType, double> item)
-        {
-            _pill.Needs.Add(item.Key,item.Value);
-        }
-
+      
         private void UpdateNeeds()
         {
             Debug.Log("Updating needs");
-            var types = _pill.Needs.Keys.ToList();
+            var types = Pill.Needs.Keys.ToList();
             foreach (var needsKey in types)
             {
-                _pill.Needs[needsKey] -= UpdateNeedValue;
-                if (_pill.Needs[needsKey] < RefillTriggerValue)
+                Pill.Needs[needsKey] -= UpdateNeedValue;
+                if (Pill.Needs[needsKey] < RefillTriggerValue)
                 {
                     GoAndRefill(needsKey);
                 }
@@ -65,7 +51,7 @@ namespace Assets.Scripts
 
         private void GoAndRefill(NeedType need)
         {
-            foreach (var fullfiller in _pill.KnownNeedFullFillers)
+            foreach (var fullfiller in Pill.KnownNeedFullFillers)
             {
                 if (fullfiller.NeedFullFilled.Equals(need))
                 {
@@ -81,12 +67,12 @@ namespace Assets.Scripts
 
         public void AddNewFriend(PillAi friend)
         {
-            if (!_pill.Friends.Contains(friend))
+            if (!Pill.Friends.Contains(friend))
             {
-                _pill.Friends.Add(friend);
-                if (!friend._pill.Friends.Contains(this))
+                Pill.Friends.Add(friend);
+                if (!friend.Pill.Friends.Contains(this))
                 {
-                    friend._pill.Friends.Add(this);
+                    friend.Pill.Friends.Add(this);
                 }
                 friend.Call("Im here!",transform.position);
                 ShareKnowledge(friend);
@@ -95,12 +81,12 @@ namespace Assets.Scripts
 
         private void ShareKnowledge(PillAi friend)
         {
-            foreach (var knownNeedFullFiller in _pill.KnownNeedFullFillers)
+            foreach (var knownNeedFullFiller in Pill.KnownNeedFullFillers)
             {
                 friend.UpdateNeedFillers(knownNeedFullFiller);
             }
 
-            foreach (var friendKnownNeedFullFiller in friend._pill.KnownNeedFullFillers)
+            foreach (var friendKnownNeedFullFiller in friend.Pill.KnownNeedFullFillers)
             {
                 UpdateNeedFillers(friendKnownNeedFullFiller);
             }
@@ -109,16 +95,15 @@ namespace Assets.Scripts
         private void Call(string message, Vector3 transformPosition)
         {
             Debug.Log(message);
-            //transform.LookAt(transformPosition);
         }
 
         public void UpdateNeedFillers(NeedFullFiller needFullFiller)
         {
-            if (!_pill.KnownNeedFullFillers.Contains(needFullFiller))
+            if (!Pill.KnownNeedFullFillers.Contains(needFullFiller))
             {
                 Debug.Log("Adding " + needFullFiller);
-                _pill.KnownNeedFullFillers.Add(needFullFiller);
-                foreach (var friend in _pill.Friends)
+                Pill.KnownNeedFullFillers.Add(needFullFiller);
+                foreach (var friend in Pill.Friends)
                 {
                     friend.UpdateNeedFillers(needFullFiller);
                 }
