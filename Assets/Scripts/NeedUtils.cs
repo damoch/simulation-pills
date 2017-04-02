@@ -9,7 +9,7 @@ namespace Assets.Scripts
 {
     public class NeedUtils : MonoBehaviour
     {
-        public static void InitializeNeeds(PillAi pillAI)
+        public static void InitializeNeeds(PillAi pillAi)
         {
             var path = "Assets\\Resources\\Needs.xml";
             var reader = new XmlTextReader(path);
@@ -17,7 +17,7 @@ namespace Assets.Scripts
             var defaults = (Needs)serializer.Deserialize(reader);
             foreach (var need in defaults.Need)
             {
-                pillAI.Pill.Needs[need.NeedType] = need.Value;
+                pillAi.Pill.Needs[need.NeedType] = need.Value;
             }
         }
     }

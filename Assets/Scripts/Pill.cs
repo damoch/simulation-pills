@@ -7,5 +7,6 @@ namespace Assets.Scripts
         public List<NeedFullFiller> KnownNeedFullFillers { get; set; }
         public Dictionary<NeedType, double> Needs { get; set; }
         public List<PillAi> Friends { get; set; }
+        public List<Item> Items { get; set; }
     }
 }
