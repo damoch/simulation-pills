@@ -22,7 +22,8 @@ namespace Assets.Scripts
             {
                 KnownNeedFullFillers = new List<NeedFullFiller>(),
                 Friends = new List<PillAi>(),
-                Needs = new Dictionary<NeedType, double>()
+                Needs = new Dictionary<NeedType, double>(),
+                Items = new List<Item>()
             };
             NeedUtils.InitializeNeeds(this);
             NavAgent = GetComponent<NavMeshAgent>();
@@ -53,7 +54,7 @@ namespace Assets.Scripts
         {
             foreach (var fullfiller in Pill.KnownNeedFullFillers)
             {
-                if (fullfiller.NeedFullFilled.Equals(need))
+                if (fullfiller != null && fullfiller.NeedFullFilled.Equals(need))
                 {
                     GoToPoint(fullfiller.transform.position);
                     return;
@@ -61,6 +62,11 @@ namespace Assets.Scripts
 
             }
             GoToPoint(GetRandomLocation());
+        }
+
+        public void GoForItem(Vector3 itemLocation)
+        {
+            GoToPoint(itemLocation);
         }
 
         private void GoToPoint(Vector3 transformPosition)
@@ -114,18 +120,51 @@ namespace Assets.Scripts
 
         }
 
+        private void OnCollisionEnter(Collision collision)
+        {
+            var other = collision.collider.gameObject;
+            switch (other.tag)
+            {
+                case "Item":
+                    {
+                        var item = other.GetComponent<Item>();
+                        Pill.Items.Add(item);
+                        Destroy(other.gameObject);
+                        break;
+                    }
+                 default:
+                    {
+                        break;
+                    }
+            }
+            
+        }
         private void OnTriggerEnter(Collider other)
         {
+            var otherTag = other.tag;
+            switch (otherTag)
+            {
+                case "NeedFiller":
+                {
+                        var filler = other.gameObject.GetComponent<NeedFullFiller>();
+                        filler.Capacity -= filler.OneFullFillmentValue;
+                        Pill.Needs[filler.NeedFullFilled] += filler.OneFullFillmentValue;
+
+                        if (filler.Capacity < 0)
+                        {
+                            Destroy(other.gameObject);
+                        }
+                        break;
+                }
+
+                default:
+                {
+                    break;
+                }
+            }
             if (other.tag.Equals("NeedFiller"))
             {
-                var filler = other.gameObject.GetComponent<NeedFullFiller>();
-                filler.Capacity -= filler.OneFullFillmentValue;
-                Pill.Needs[filler.NeedFullFilled] += filler.OneFullFillmentValue;
 
-                if (filler.Capacity < 0)
-                {
-                    Destroy(other.gameObject);
-                }
             }
         }
 

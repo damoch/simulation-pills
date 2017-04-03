@@ -12,14 +12,33 @@ namespace Assets.Scripts
         }
         private void OnTriggerEnter(Collider other)
         {
-            if (other.tag.Equals("Pill"))
+            var otherTag = other.tag;
+            switch (otherTag)
             {
-                _owner.AddNewFriend(other.gameObject.GetComponent<PillAi>());
+                case "Pill":
+                {
+                    var friend = other.GetComponent<PillAi>();
+                        _owner.AddNewFriend(friend);
+                        break;
+                }
+                case "NeedFiller":
+                {
+                    var needFiller = other.GetComponent<NeedFullFiller>();
+                        _owner.UpdateNeedFillers(needFiller);
+                        break;
+                }
+                case "Item":
+                {
+                    var otherLocation = other.gameObject.transform.position;
+                        _owner.GoForItem(otherLocation);
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
             }
-            if (other.tag.Equals("NeedFiller"))
-            {
-                _owner.UpdateNeedFillers(other.GetComponent<NeedFullFiller>());
-            }
+
       
         }
     }
